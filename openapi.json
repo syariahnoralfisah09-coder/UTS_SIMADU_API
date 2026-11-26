@@ -1,0 +1,299 @@
+
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "SIMADU API",
+    "version": "1.0.0",
+    "description": "Dokumentasi API Sistem Layanan Informasi dan Pengaduan Mahasiswa."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Server lokal SIMADU"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Autentikasi",
+      "description": "Proses login pengguna"
+    },
+    {
+      "name": "Pengaduan",
+      "description": "Pengelolaan data pengaduan mahasiswa"
+    }
+  ],
+  "paths": {
+    "/api/auth/login": {
+      "post": {
+        "tags": ["Autentikasi"],
+        "summary": "Login pengguna",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login berhasil"
+          },
+          "400": {
+            "description": "Data login tidak valid"
+          },
+          "401": {
+            "description": "Email atau password salah"
+          }
+        }
+      }
+    },
+    "/api/pengaduan": {
+      "get": {
+        "tags": ["Pengaduan"],
+        "summary": "Mengambil daftar pengaduan",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daftar pengaduan berhasil diambil"
+          },
+          "401": {
+            "description": "Token tidak tersedia atau tidak valid"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Pengaduan"],
+        "summary": "Membuat pengaduan baru",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PengaduanRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pengaduan berhasil dibuat"
+          },
+          "400": {
+            "description": "Data tidak valid"
+          },
+          "401": {
+            "description": "Token tidak valid"
+          },
+          "403": {
+            "description": "Akses ditolak"
+          }
+        }
+      }
+    },
+    "/api/pengaduan/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "get": {
+        "tags": ["Pengaduan"],
+        "summary": "Mengambil detail pengaduan",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detail pengaduan ditemukan"
+          },
+          "401": {
+            "description": "Token tidak valid"
+          },
+          "403": {
+            "description": "Tidak memiliki akses"
+          },
+          "404": {
+            "description": "Pengaduan tidak ditemukan"
+          }
+        }
+      },
+      "put": {
+        "tags": ["Pengaduan"],
+        "summary": "Mengubah pengaduan milik sendiri",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PengaduanRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pengaduan berhasil diperbarui"
+          },
+          "400": {
+            "description": "Data tidak valid"
+          },
+          "401": {
+            "description": "Token tidak valid"
+          },
+          "403": {
+            "description": "Tidak boleh mengubah pengaduan"
+          },
+          "404": {
+            "description": "Pengaduan tidak ditemukan"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Pengaduan"],
+        "summary": "Menghapus pengaduan milik sendiri",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pengaduan berhasil dihapus"
+          },
+          "401": {
+            "description": "Token tidak valid"
+          },
+          "403": {
+            "description": "Tidak boleh menghapus pengaduan"
+          },
+          "404": {
+            "description": "Pengaduan tidak ditemukan"
+          }
+        }
+      }
+    },
+    "/api/pengaduan/{id}/status": {
+      "patch": {
+        "tags": ["Pengaduan"],
+        "summary": "Mengubah status pengaduan oleh admin",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["status"],
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": ["diajukan", "diproses", "selesai"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Status berhasil diperbarui"
+          },
+          "400": {
+            "description": "Status tidak valid"
+          },
+          "401": {
+            "description": "Token tidak valid"
+          },
+          "403": {
+            "description": "Hanya admin yang dapat mengubah status"
+          },
+          "404": {
+            "description": "Pengaduan tidak ditemukan"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "LoginRequest": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "mahasiswa@simadu.ac.id"
+          },
+          "password": {
+            "type": "string",
+            "example": "Mhs12345!"
+          }
+        }
+      },
+      "PengaduanRequest": {
+        "type": "object",
+        "required": ["judul", "kategori", "deskripsi"],
+        "properties": {
+          "judul": {
+            "type": "string",
+            "example": "Lampu ruang kelas mati"
+          },
+          "kategori": {
+            "type": "string",
+            "enum": ["Fasilitas", "Akademik", "TI"],
+            "example": "Fasilitas"
+          },
+          "deskripsi": {
+            "type": "string",
+            "example": "Lampu di ruang kelas tidak menyala."
+          }
+        }
+      }
+    }
+  }
+}
